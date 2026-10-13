@@ -1,0 +1,374 @@
+/* ============================================================
+   main.css — Design tokens, reset, typography, layout globals
+   Game Library · Team ZENITH
+   ============================================================ */
+
+/* Google Fonts fallback handled by body font-family */
+
+/* ── Design Tokens ──────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg-primary:    #0b0d10;
+  --bg-secondary:  #11151a;
+  --bg-elevated:   #171c23;
+  --bg-overlay:    rgba(11, 13, 16, 0.85);
+
+  /* Text */
+  --text-primary:   #f3f5f7;
+  --text-secondary: #9aa4b2;
+  --text-muted:     #687382;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  /* Accent — cyan/teal (Flappy Bird theme) */
+  --accent:      #66d9e8;
+  --accent-soft: rgba(102, 217, 232, 0.12);
+  --accent-glow: rgba(102, 217, 232, 0.20);
+
+  /* Semantic colours */
+  --success: #8ce3b1;
+  --warning: #f3c97a;
+  --danger:  #ff8585;
+
+  /* Corner radii */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+
+  /* Spacing scale */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+
+  /* Transitions */
+  --transition-fast:   180ms ease;
+  --transition-normal: 240ms ease;
+  --transition-slow:   360ms ease;
+
+  /* Game-specific theme variables (overridden per game) */
+  --game-accent:      var(--accent);
+  --game-accent-soft: var(--accent-soft);
+  --game-accent-glow: var(--accent-glow);
+}
+
+/* ── Motion preference ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:   0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration:  0.01ms !important;
+  }
+}
+
+/* ── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+               Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* ── Focus Styles ──────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── Application Shell ─────────────────────────────────── */
+#app {
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* ── Screen Management ─────────────────────────────────── */
+.screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen--centered {
+  align-items: center;
+  justify-content: center;
+}
+
+.screen[hidden] {
+  display: none !important;
+}
+
+/* Screen transition animations */
+.screen--entering {
+  animation: screenEnter var(--transition-normal) forwards;
+}
+
+.screen--leaving {
+  animation: screenLeave var(--transition-fast) forwards;
+}
+
+@keyframes screenEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes screenLeave {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ── Typography Utilities ──────────────────────────────── */
+.text-primary   { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted     { color: var(--text-muted); }
+.text-accent    { color: var(--accent); }
+.text-warning   { color: var(--warning); }
+.text-success   { color: var(--success); }
+.text-danger    { color: var(--danger); }
+
+/* ── Library Screen Layout ─────────────────────────────── */
+.lib-header {
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.lib-header__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.lib-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.lib-header__logo {
+  flex-shrink: 0;
+}
+
+.lib-header__title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.lib-header__tagline {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.lib-header__badge {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid var(--border-subtle);
+}
+
+.badge--team {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: rgba(102, 217, 232, 0.2);
+}
+
+.badge--event {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+/* Library Main */
+.lib-main {
+  flex: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--space-12) var(--space-6);
+}
+
+.lib-section-header {
+  margin-bottom: var(--space-8);
+}
+
+.lib-section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+}
+
+.lib-section-sub {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: var(--space-1);
+}
+
+/* ── Footer ────────────────────────────────────────────── */
+.lib-footer {
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+}
+
+.lib-footer__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.lib-footer__left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.lib-footer__team {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.lib-footer__event {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.lib-footer__attribution {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.lib-footer__link {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── Error / 404 State ─────────────────────────────────── */
+.error-state {
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  max-width: 400px;
+}
+
+.error-state__icon {
+  margin: 0 auto var(--space-6);
+  width: 64px;
+  height: 64px;
+}
+
+.error-state__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-3);
+}
+
+.error-state__message {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-8);
+  line-height: 1.6;
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .lib-header__inner {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .lib-header__tagline {
+    display: none;
+  }
+
+  .lib-main {
+    padding: var(--space-8) var(--space-4);
+  }
+
+  .lib-section-title {
+    font-size: 1.4rem;
+  }
+
+  .lib-footer__inner {
+    flex-direction: column;
+    padding: var(--space-4);
+  }
+
+  .lib-footer__attribution {
+    text-align: left;
+  }
+}

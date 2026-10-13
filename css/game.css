@@ -1,0 +1,397 @@
+/* ============================================================
+   game.css — Game screen layout and Flappy Bird DOM styling
+   Game Library · Team ZENITH
+   ============================================================ */
+
+/* ── Play Screen Layout ────────────────────────────────── */
+.play-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--bg-primary);
+}
+
+.play-screen__header {
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.play-screen__title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.play-screen__game-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.play-screen__hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.play-screen__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--space-6) var(--space-4);
+  gap: var(--space-4);
+}
+
+/* ── Score Bar ─────────────────────────────────────────── */
+.score-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  width: 100%;
+  max-width: 480px;
+}
+
+.score-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.score-item__label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.score-item__value {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: color var(--transition-fast);
+}
+
+.score-item__value--best {
+  color: var(--warning);
+}
+
+.score-item__value--new-best {
+  color: var(--success);
+  animation: newBest 0.5s ease;
+}
+
+@keyframes newBest {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+.score-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border-subtle);
+}
+
+/* ── Game Container ────────────────────────────────────── */
+.game-viewport {
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--game-accent, var(--accent));
+  box-shadow: 0 0 0 1px var(--game-accent-glow, var(--accent-glow)),
+              0 0 40px -8px var(--game-accent-glow, var(--accent-glow)),
+              0 16px 64px rgba(0, 0, 0, 0.5);
+  background: var(--bg-elevated);
+  /* Prevent page scroll during touch gameplay */
+  touch-action: none;
+}
+
+/* Aspect ratio container for the game */
+.game-viewport__inner {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  position: relative;
+  max-height: calc(100dvh - 260px);
+  overflow: hidden;
+}
+
+/* ── Game Actions ──────────────────────────────────────── */
+.game-actions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Game Over Overlay ─────────────────────────────────── */
+.gameover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 13, 16, 0.82);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  z-index: 100;
+  animation: fadeIn 0.25s ease forwards;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.gameover-overlay__title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.gameover-overlay__score {
+  text-align: center;
+}
+
+.gameover-overlay__score-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.gameover-overlay__score-value {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.gameover-overlay__best {
+  font-size: 0.85rem;
+  color: var(--warning);
+  margin-top: var(--space-2);
+}
+
+/* ── Splash overlay (before game starts) ──────────────── */
+.splash-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 13, 16, 0.75);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  z-index: 90;
+  text-align: center;
+  padding: var(--space-6);
+  transition: opacity var(--transition-normal);
+}
+
+.splash-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-overlay__title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.splash-overlay__hint {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* ── Flappy Bird DOM Game Styles ───────────────────────── */
+/*
+ * The Flappy Bird game renders using CSS-animated DOM elements
+ * inside the .game-viewport__inner container.
+ * These styles replicate the original floppybird CSS
+ * scoped to the game container to avoid conflicts.
+ */
+
+.fb-game {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  /* Base sky colour */
+  background-color: #4dc8e8;
+  font-family: 'Inter', sans-serif;
+  user-select: none;
+}
+
+/* Sky background */
+.fb-sky {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url('../games/flappy-bird/assets/sky.png');
+  background-repeat: repeat-x;
+  background-position: 0 100%;
+  background-size: auto 100%;
+  animation: fbAnimSky 4s linear infinite;
+}
+
+/* Land / ground strip */
+.fb-land {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 20%;
+  min-height: 60px;
+  background-image: url('../games/flappy-bird/assets/land.png');
+  background-repeat: repeat-x;
+  background-position: 0 0;
+  background-size: auto 100%;
+  animation: fbAnimLand 0.6s linear infinite;
+  z-index: 10;
+}
+
+/* Ceiling (invisible barrier) */
+.fb-ceiling {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 14px;
+  background-image: url('../games/flappy-bird/assets/ceiling.png');
+  background-repeat: repeat-x;
+  z-index: 10;
+}
+
+/* Bird */
+.fb-bird {
+  position: absolute;
+  width: 34px;
+  height: 24px;
+  background-image: url('../games/flappy-bird/assets/bird.png');
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  animation: fbAnimBird 0.12s steps(3) infinite;
+  z-index: 20;
+  transform-origin: 50% 50%;
+  /* Default position: left-center */
+  left: 22%;
+}
+
+/* Pipes */
+.fb-pipe {
+  position: absolute;
+  width: 52px;
+  z-index: 5;
+}
+
+.fb-pipe-upper {
+  background-image: url('../games/flappy-bird/assets/pipe-down.png');
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: 100% auto;
+  position: absolute;
+  width: 100%;
+  top: 0;
+}
+
+.fb-pipe-lower {
+  background-image: url('../games/flappy-bird/assets/pipe-up.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: 100% auto;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+}
+
+/* Score display inside game */
+.fb-score {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.fb-score-digit {
+  width: 18px;
+  height: 28px;
+  background-image: url('../games/flappy-bird/assets/font_big_0.png');
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+}
+
+/* ── Keyframe animations for the game ─────────────────── */
+@keyframes fbAnimSky {
+  0%   { background-position: 0 100%; }
+  100% { background-position: -275px 100%; }
+}
+
+@keyframes fbAnimLand {
+  0%   { background-position: 0 0; }
+  100% { background-position: -335px 0; }
+}
+
+@keyframes fbAnimBird {
+  from { background-position: 0 0; }
+  to   { background-position: 0 -72px; }
+}
+
+/* ── Responsive game viewport ──────────────────────────── */
+@media (max-width: 520px) {
+  .game-viewport {
+    border-radius: var(--radius-md);
+  }
+
+  .game-viewport__inner {
+    max-height: calc(100dvh - 240px);
+  }
+
+  .score-item__value {
+    font-size: 1.5rem;
+  }
+
+  .play-screen__header {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .play-screen__body {
+    padding: var(--space-4) var(--space-3);
+    gap: var(--space-3);
+  }
+}
+
+@media (max-height: 600px) {
+  .game-viewport__inner {
+    aspect-ratio: auto;
+    height: 320px;
+    max-height: 320px;
+  }
+}
