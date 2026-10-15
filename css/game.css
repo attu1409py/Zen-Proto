@@ -125,9 +125,9 @@
 /* Aspect ratio container for the game */
 .game-viewport__inner {
   width: 100%;
-  aspect-ratio: 9 / 16;
+  aspect-ratio: var(--game-aspect, 9 / 16);
   position: relative;
-  max-height: calc(100dvh - 260px);
+  max-height: calc(100dvh - 240px);
   overflow: hidden;
 }
 

@@ -12,47 +12,113 @@ import { GAMES } from './games.js';
 import { navigate, showScreen } from './router.js';
 
 /** SVGs for placeholder game art */
-const PLACEHOLDER_ART = {
-  '2048': `
-    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="4" y="4" width="34" height="34" rx="8" fill="rgba(167,139,250,0.2)" stroke="rgba(167,139,250,0.4)" stroke-width="1.5"/>
-      <rect x="42" y="4" width="34" height="34" rx="8" fill="rgba(167,139,250,0.12)" stroke="rgba(167,139,250,0.2)" stroke-width="1.5"/>
-      <rect x="4" y="42" width="34" height="34" rx="8" fill="rgba(167,139,250,0.12)" stroke="rgba(167,139,250,0.2)" stroke-width="1.5"/>
-      <rect x="42" y="42" width="34" height="34" rx="8" fill="rgba(167,139,250,0.35)" stroke="rgba(167,139,250,0.5)" stroke-width="1.5"/>
-      <text x="21" y="26" text-anchor="middle" fill="rgba(167,139,250,0.9)" font-size="13" font-weight="700" font-family="Inter,sans-serif">2</text>
-      <text x="21" y="64" text-anchor="middle" fill="rgba(167,139,250,0.5)" font-size="11" font-weight="600" font-family="Inter,sans-serif">4</text>
-      <text x="59" y="64" text-anchor="middle" fill="rgba(167,139,250,0.9)" font-size="10" font-weight="700" font-family="Inter,sans-serif">2048</text>
-    </svg>`,
+/** Game Card Previews */
+function renderCardArt(game) {
+  if (game.id === 'flappy-bird') {
+    return renderFlappyArt();
+  }
 
-  'hamster-hit': `
-    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Hole -->
-      <ellipse cx="40" cy="52" rx="22" ry="10" fill="rgba(0,0,0,0.4)"/>
-      <rect x="18" y="42" width="44" height="10" rx="2" fill="rgba(134,239,172,0.15)"/>
-      <!-- Hamster face -->
-      <circle cx="40" cy="38" r="18" fill="rgba(134,239,172,0.2)" stroke="rgba(134,239,172,0.4)" stroke-width="1.5"/>
-      <circle cx="32" cy="35" r="3" fill="rgba(134,239,172,0.5)"/>
-      <circle cx="48" cy="35" r="3" fill="rgba(134,239,172,0.5)"/>
-      <circle cx="32" cy="35" r="1.5" fill="rgba(134,239,172,0.9)"/>
-      <circle cx="48" cy="35" r="1.5" fill="rgba(134,239,172,0.9)"/>
-      <path d="M35 43 Q40 47 45 43" stroke="rgba(134,239,172,0.8)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    </svg>`,
+  if (game.id === '2048') {
+    return `
+      <div class="art-scene" aria-hidden="true" style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 50%, #2a1b06 0%, #140d04 100%);">
+        <svg width="140" height="100" viewBox="0 0 140 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Mini Board -->
+          <rect x="10" y="5" width="120" height="90" rx="12" fill="#11151a" stroke="rgba(245,158,11,0.3)" stroke-width="1.5"/>
+          <!-- Cells & Tiles -->
+          <rect x="18" y="13" width="24" height="24" rx="5" fill="#1c222c" stroke="rgba(245,158,11,0.2)"/>
+          <text x="30" y="29" text-anchor="middle" fill="#f3f5f7" font-size="11" font-weight="700" font-family="Inter,sans-serif">2</text>
+          
+          <rect x="46" y="13" width="24" height="24" rx="5" fill="#252d3b" stroke="rgba(245,158,11,0.3)"/>
+          <text x="58" y="29" text-anchor="middle" fill="#f3f5f7" font-size="11" font-weight="700" font-family="Inter,sans-serif">4</text>
+          
+          <rect x="74" y="13" width="24" height="24" rx="5" fill="#422912" stroke="rgba(245,158,11,0.4)"/>
+          <text x="86" y="29" text-anchor="middle" fill="#fde68a" font-size="11" font-weight="700" font-family="Inter,sans-serif">8</text>
 
-  'snake': `
-    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Snake body segments -->
-      <rect x="10" y="36" width="14" height="14" rx="4" fill="rgba(252,211,77,0.15)" stroke="rgba(252,211,77,0.3)" stroke-width="1"/>
-      <rect x="26" y="36" width="14" height="14" rx="4" fill="rgba(252,211,77,0.2)" stroke="rgba(252,211,77,0.35)" stroke-width="1"/>
-      <rect x="42" y="36" width="14" height="14" rx="4" fill="rgba(252,211,77,0.3)" stroke="rgba(252,211,77,0.5)" stroke-width="1"/>
-      <rect x="42" y="20" width="14" height="14" rx="4" fill="rgba(252,211,77,0.4)" stroke="rgba(252,211,77,0.6)" stroke-width="1"/>
-      <!-- Head -->
-      <rect x="58" y="20" width="14" height="14" rx="4" fill="rgba(252,211,77,0.7)" stroke="rgba(252,211,77,0.9)" stroke-width="1.5"/>
-      <circle cx="63" cy="25" r="2" fill="#0b0d10"/>
-      <circle cx="69" cy="25" r="2" fill="#0b0d10"/>
-      <!-- Food dot -->
-      <circle cx="20" cy="20" r="5" fill="rgba(252,211,77,0.9)"/>
-    </svg>`,
-};
+          <rect x="102" y="13" width="24" height="24" rx="5" fill="#5e360f" stroke="rgba(245,158,11,0.5)"/>
+          <text x="114" y="29" text-anchor="middle" fill="#fef3c7" font-size="10" font-weight="700" font-family="Inter,sans-serif">16</text>
+
+          <rect x="18" y="41" width="24" height="24" rx="5" fill="#7d4409"/>
+          <text x="30" y="57" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="700" font-family="Inter,sans-serif">32</text>
+
+          <rect x="46" y="41" width="24" height="24" rx="5" fill="#b56201"/>
+          <text x="58" y="57" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="700" font-family="Inter,sans-serif">128</text>
+
+          <!-- Golden 2048 Tile -->
+          <rect x="74" y="41" width="52" height="48" rx="8" fill="url(#goldGrad)" stroke="#ffffff" stroke-width="1.5" filter="drop-shadow(0 0 10px rgba(251,191,36,0.6))"/>
+          <text x="100" y="71" text-anchor="middle" fill="#0b0d10" font-size="16" font-weight="800" font-family="Inter,sans-serif">2048</text>
+          
+          <defs>
+            <linearGradient id="goldGrad" x1="74" y1="41" x2="126" y2="89" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#fde047"/>
+              <stop offset="1" stop-color="#f59e0b"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    `;
+  }
+
+  if (game.id === 'hamster-hit') {
+    return `
+      <div class="art-scene" aria-hidden="true" style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%, #261608 0%, #120b04 100%);">
+        <svg width="120" height="90" viewBox="0 0 120 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Burrow Hole -->
+          <ellipse cx="60" cy="68" rx="42" ry="16" fill="#090b0e" stroke="rgba(255,119,34,0.3)" stroke-width="2"/>
+          <ellipse cx="60" cy="69" rx="36" ry="12" fill="#050608"/>
+          <!-- Emerging Hamster -->
+          <circle cx="44" cy="36" r="9" fill="#d97706"/>
+          <circle cx="44" cy="36" r="5" fill="#fca5a5"/>
+          <circle cx="76" cy="36" r="9" fill="#d97706"/>
+          <circle cx="76" cy="36" r="5" fill="#fca5a5"/>
+          <ellipse cx="60" cy="52" rx="22" ry="19" fill="#f59e0b"/>
+          <ellipse cx="60" cy="56" rx="13" ry="11" fill="#fef3c7"/>
+          <circle cx="48" cy="53" r="4" fill="#f87171" opacity="0.6"/>
+          <circle cx="72" cy="53" r="4" fill="#f87171" opacity="0.6"/>
+          <circle cx="53" cy="48" r="3.5" fill="#111827"/>
+          <circle cx="54" cy="47" r="1.2" fill="#ffffff"/>
+          <circle cx="67" cy="48" r="3.5" fill="#111827"/>
+          <circle cx="68" cy="47" r="1.2" fill="#ffffff"/>
+          <polygon points="58,52 62,52 60,54.5" fill="#f43f5e"/>
+          <path d="M58 55 Q60 57.5 62 55" stroke="#78350f" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <!-- Front Lip of hole -->
+          <path d="M22 68 Q60 84 98 68" stroke="#ff7722" stroke-width="2.5" fill="none" opacity="0.7"/>
+          <!-- Mallet Sparkle -->
+          <circle cx="95" cy="25" r="3" fill="#ff7722"/>
+          <polygon points="95,15 97,22 104,25 97,28 95,35 93,28 86,25 93,22" fill="#fbbf24"/>
+        </svg>
+      </div>
+    `;
+  }
+
+  if (game.id === 'snake') {
+    return `
+      <div class="art-scene" aria-hidden="true" style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 50%, #092011 0%, #05120a 100%);">
+        <svg width="130" height="90" viewBox="0 0 130 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Subtle Grid lines -->
+          <path d="M15 15 H115 M15 35 H115 M15 55 H115 M15 75 H115" stroke="rgba(34,197,94,0.08)" stroke-width="1"/>
+          <path d="M25 5 V85 M50 5 V85 M75 5 V85 M100 5 V85" stroke="rgba(34,197,94,0.08)" stroke-width="1"/>
+          
+          <!-- Snake Body Segments -->
+          <rect x="25" y="55" width="16" height="16" rx="5" fill="#16a34a"/>
+          <rect x="45" y="55" width="16" height="16" rx="5" fill="#22c55e"/>
+          <rect x="65" y="55" width="16" height="16" rx="5" fill="#22c55e"/>
+          <rect x="65" y="35" width="16" height="16" rx="5" fill="#22c55e"/>
+          <!-- Snake Head with Glow -->
+          <rect x="85" y="35" width="18" height="18" rx="6" fill="#4ade80" filter="drop-shadow(0 0 8px rgba(74,222,128,0.7))"/>
+          <circle cx="98" cy="40" r="2.2" fill="#0b0d10"/>
+          <circle cx="98" cy="48" r="2.2" fill="#0b0d10"/>
+          
+          <!-- Radiant Food Apple Orb -->
+          <circle cx="106" cy="63" r="10" fill="rgba(239,68,68,0.25)"/>
+          <circle cx="106" cy="63" r="6" fill="#ef4444" filter="drop-shadow(0 0 6px #ef4444)"/>
+          <circle cx="104" cy="61" r="1.5" fill="#ffffff"/>
+        </svg>
+      </div>
+    `;
+  }
+
+  return '';
+}
 
 /** Flappy Bird card art — inline SVG scene */
 function renderFlappyArt() {
@@ -104,15 +170,7 @@ function buildCard(game) {
   // Build art section
   const artSection = document.createElement('div');
   artSection.className = `game-card__art ${game.artClass}`;
-
-  if (isActive && game.id === 'flappy-bird') {
-    artSection.innerHTML = renderFlappyArt();
-  } else {
-    const artInner = document.createElement('div');
-    artInner.className = 'game-card__art-inner';
-    artInner.innerHTML = PLACEHOLDER_ART[game.id] ?? '';
-    artSection.appendChild(artInner);
-  }
+  artSection.innerHTML = renderCardArt(game);
 
   // Build body
   const body = document.createElement('div');

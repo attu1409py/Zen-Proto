@@ -281,17 +281,17 @@
   background: var(--bg-elevated);
 }
 
-/* Placeholder art patterns */
+/* Card art patterns */
 .game-card__art--2048 {
-  background: linear-gradient(135deg, #2d1b69 0%, #1a0e4f 100%);
+  background: radial-gradient(circle at 50% 50%, #2a1b06 0%, #140d04 100%);
 }
 
 .game-card__art--hamster {
-  background: linear-gradient(135deg, #1a3a1a 0%, #0f2410 100%);
+  background: radial-gradient(circle at 50% 40%, #261608 0%, #120b04 100%);
 }
 
 .game-card__art--snake {
-  background: linear-gradient(135deg, #1a1a0a 0%, #0f0f06 100%);
+  background: radial-gradient(circle at 50% 50%, #092011 0%, #05120a 100%);
 }
 
 /* ── Mode Selection Screen ─────────────────────────────── */

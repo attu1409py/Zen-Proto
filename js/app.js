@@ -29,20 +29,19 @@ route('/play/:id',  (params) => renderGameScreen(params));
 
 /* ── Global keyboard handler ───────────────────────────── */
 /*
- * Space key is intercepted only when the play screen is active.
- * This prevents scrolling during gameplay without breaking
- * normal keyboard navigation on other screens.
- *
- * The actual flap action is forwarded to the game via a
- * CustomEvent on the document, which the game module listens for.
- * This decouples app-level input handling from game-specific logic.
+ * Arrow keys and Space are intercepted only when the play screen is active.
+ * This prevents page scrolling during gameplay across all games without
+ * breaking normal keyboard navigation on other screens.
  */
 document.addEventListener('keydown', (e) => {
-  if (e.key === ' ' || e.code === 'Space') {
-    const playScreen = document.getElementById('screen-play');
-    if (playScreen && !playScreen.hidden) {
+  const playScreen = document.getElementById('screen-play');
+  if (playScreen && !playScreen.hidden) {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Space'].includes(e.key) || e.code === 'Space') {
       e.preventDefault();
+    }
+    if (e.key === ' ' || e.code === 'Space') {
       document.dispatchEvent(new CustomEvent('game:flap'));
+      document.dispatchEvent(new CustomEvent('game:space'));
     }
   }
 }, { passive: false });
