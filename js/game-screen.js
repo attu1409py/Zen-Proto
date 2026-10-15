@@ -30,8 +30,10 @@ const ICONS = {
   </svg>`,
 };
 
-/** Storage key for best score */
-const STORAGE_KEY = 'game-library:flappy-bird:best';
+/** Storage key generator for best score per game */
+function getStorageKey(gameId) {
+  return `game-library:${gameId}:best`;
+}
 
 /** Currently active game controller (from entry module) */
 let _gameController = null;
@@ -41,11 +43,12 @@ let _gameActive = false;
 
 /**
  * Read and validate the stored best score.
+ * @param {string} gameId
  * @returns {number}
  */
-function readBestScore() {
+function readBestScore(gameId) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey(gameId));
     if (raw === null) return 0;
     const n = parseInt(raw, 10);
     return Number.isFinite(n) && n >= 0 ? n : 0;
@@ -56,11 +59,12 @@ function readBestScore() {
 
 /**
  * Write the best score to localStorage.
+ * @param {string} gameId
  * @param {number} score
  */
-function writeBestScore(score) {
+function writeBestScore(gameId, score) {
   try {
-    localStorage.setItem(STORAGE_KEY, String(score));
+    localStorage.setItem(getStorageKey(gameId), String(score));
   } catch {
     // Storage unavailable — fail silently, don't crash
   }
@@ -100,8 +104,9 @@ export async function renderGameScreen(params) {
   screen.style.setProperty('--game-accent',      game.theme.accent);
   screen.style.setProperty('--game-accent-soft', game.theme.accentSoft);
   screen.style.setProperty('--game-accent-glow', game.theme.accentGlow);
+  screen.style.setProperty('--game-aspect',      game.aspectRatio || '9 / 16');
 
-  let bestScore = readBestScore();
+  let bestScore = readBestScore(game.id);
 
   // Build screen HTML
   screen.innerHTML = `
@@ -116,7 +121,7 @@ export async function renderGameScreen(params) {
         </nav>
         <div class="play-screen__title-block">
           <span class="play-screen__game-name">${escHtml(game.name)}</span>
-          <span class="play-screen__hint" aria-live="polite" id="play-hint">Space · Click · Tap to flap</span>
+          <span class="play-screen__hint" aria-live="polite" id="play-hint">${escHtml(game.hint || '')}</span>
         </div>
         <button
           class="btn btn--ghost btn--sm"
@@ -141,7 +146,7 @@ export async function renderGameScreen(params) {
         </div>
 
         <!-- Game Viewport -->
-        <div class="game-viewport" id="game-viewport" aria-label="Flappy Bird game area">
+        <div class="game-viewport" id="game-viewport" aria-label="${escHtml(game.name)} game area">
           <div class="game-viewport__inner" id="game-container">
             <!-- Game mounts here -->
           </div>
@@ -190,7 +195,7 @@ export async function renderGameScreen(params) {
   function checkBest(finalScore) {
     if (finalScore > bestScore) {
       bestScore = finalScore;
-      writeBestScore(bestScore);
+      writeBestScore(game.id, bestScore);
       if (bestEl) {
         bestEl.textContent = String(bestScore);
         bestEl.setAttribute('aria-label', `Best score: ${bestScore}`);
@@ -246,7 +251,7 @@ export async function renderGameScreen(params) {
     document.getElementById('gameover-overlay')?.remove();
     updateScore(0);
     _gameActive = true;
-    if (hintEl) hintEl.textContent = 'Space · Click · Tap to flap';
+    if (hintEl) hintEl.textContent = game.hint || '';
 
     if (_gameController && typeof _gameController.restart === 'function') {
       try {
@@ -274,7 +279,8 @@ export async function renderGameScreen(params) {
     }
 
     _gameController = module.init(container, {
-      assetsBase: './games/flappy-bird/assets/',
+      assetsBase: `./games/${game.id}/assets/`,
+      game,
     });
 
     // Register game-over callback

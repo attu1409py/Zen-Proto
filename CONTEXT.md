@@ -24,18 +24,19 @@ The prototype communicates the planned AI capability through the interface desig
 
 | Feature | Description |
 |---|---|
-| Library home screen | All 4 games rendered from registry; 1 active, 3 placeholder |
+| Library home screen | All 4 games rendered from registry; all 4 active and playable |
 | Hash-based routing | `#/`, `#/game/:id`, `#/play/:id` with Back/Forward support |
 | Flappy Bird — playable | Canvas-based game with original assets, physics, and scoring |
-| Space / Click / Tap to flap | Cross-device input handling |
-| Score display | Real-time current score during gameplay |
-| Best score persistence | localStorage with validation and graceful fallback |
-| Game restart | Clean restart without page reload or duplicate loops |
-| Game-over screen | Inline overlay with score, new-best indicator, Play Again |
-| Responsive layout | Mobile (320px+), tablet, and desktop |
-| Laya mode UI | Visible, properly disabled, with explanatory note |
-| Game lifecycle | init → start → restart → destroy with cleanup on route change |
-| Coming-soon cards | 2048, Hamster Hit, Snake — visible, non-interactive |
+| 2048 — playable | Smooth GPU-accelerated grid tile merges, arrow keys, WASD, swipe |
+| Hamster Hit — playable | 3x3 hole burrow grid, 30s timer, scaling speed, hamsters, golden bonus, bomb decoy |
+| Snake — playable | Canvas-based snake, arrow keys, WASD, mobile swipe, virtual D-pad, Space pause |
+| Score display & tracking | Real-time current score during gameplay for all 4 games |
+| Best score persistence | Independent `localStorage` keys per game (`game-library:<id>:best`) |
+| Game restart | Clean restart without page reload, duplicate loops, or state leaks |
+| Game-over screen | Inline modal overlay with final score, new-best record badge, Play Again |
+| Responsive layout | Mobile (320px+), tablet, and desktop with dynamic aspect-ratio scaling |
+| Laya mode UI | Themed per game, properly disabled with prototype disclaimer note |
+| Game lifecycle | init → start → restart → destroy with complete teardown on route change |
 | Accessible markup | ARIA roles, labels, focus indicators, disabled semantics |
 | SEO metadata | Title, description, Open Graph, viewport, theme-color |
 | Favicon | SVG favicon with bird/pipe motif |
@@ -46,7 +47,6 @@ The prototype communicates the planned AI capability through the interface desig
 |---|---|
 | Laya agent decision-making | Requires RL training pipeline — main project only |
 | Autonomous gameplay control | Not in prototype scope |
-| 2048, Hamster Hit, Snake gameplay | Placeholders for future sprints |
 | Backend / database | Static site, no server required |
 | Multiplayer / leaderboards | Not in scope |
 | LAYA agent training UI | Not in scope |
@@ -68,28 +68,37 @@ The prototype communicates the planned AI capability through the interface desig
 │   ├── components.css    Shared UI: buttons, cards, game grid, mode selection, badges
 │   └── game.css          Play screen layout, score bar, game viewport, overlays
 ├── js/
-│   ├── app.js            Entry: wires routes, global Space key handler, router init
+│   ├── app.js            Entry: wires routes, global key prevention/dispatch, router init
 │   ├── router.js         Hash router: route(), navigate(), showScreen(), onBeforeRoute()
 │   ├── games.js          Game registry — source of truth for all game metadata
 │   ├── library.js        Renders library home screen from registry
 │   ├── game-mode.js      Renders mode selection screen (Play Yourself / Let Laya Play)
 │   └── game-screen.js    Renders play screen; loads game module; manages lifecycle
 └── games/
-    └── flappy-bird/
+    ├── flappy-bird/
+    │   ├── index.js      Public API module: init(), controller object
+    │   ├── game.js       Canvas game engine: physics, pipes, collision, rendering
+    │   ├── LICENSE       Apache 2.0 (original author: Nebez Briefkani)
+    │   ├── README.md     Game attribution and modification notes
+    │   └── assets/       Sprites and sounds
+    ├── 2048/
+    │   ├── index.js      Public API module: init(), controller object
+    │   ├── game.js       Tile & Grid engine, touch swipe, WASD, LAYA hooks
+    │   ├── 2048.css      Scoped CSS under .game-2048 with dark amber theme
+    │   ├── LICENSE       MIT (original author: Gabriele Cirulli)
+    │   └── README.md     Attribution and modification notes
+    ├── hamster-hit/
+    │   ├── index.js      Public API module: init(), controller object
+    │   ├── game.js       3x3 burrow grid engine, 30s timer, bomb/gold mechanics, LAYA hooks
+    │   ├── hamster-hit.css Scoped CSS under .game-hamster with warm orange theme & mallet cursor
+    │   ├── LICENSE       MIT (authors: Yeab-Ad / Mubashir Naik)
+    │   └── README.md     Attribution and modification notes
+    └── snake/
         ├── index.js      Public API module: init(), controller object
-        ├── game.js       Canvas game engine: physics, pipes, collision, rendering
-        ├── LICENSE       Apache 2.0 (original author: Nebez Briefkani)
-        ├── README.md     Game attribution and modification notes
-        └── assets/
-            ├── bird.png, sky.png, land.png, ceiling.png
-            ├── pipe-up.png, pipe-down.png, pipe.png
-            ├── splash.png, scoreboard.png, replay.png
-            ├── font_big_0.png … font_big_9.png
-            ├── font_small_0.png … font_small_9.png
-            ├── medal_bronze/silver/gold/platinum.png
-            └── sounds/
-                sfx_wing.ogg, sfx_point.ogg, sfx_hit.ogg,
-                sfx_die.ogg, sfx_swooshing.ogg
+        ├── game.js       Canvas snake engine, apple spawns, speed ramp, D-pad, LAYA hooks
+        ├── snake.css     Scoped CSS under .game-snake with green theme & mobile D-pad
+        ├── LICENSE       MIT (author: Impre7ive)
+        └── README.md     Attribution and modification notes
 ```
 
 ---
@@ -243,14 +252,30 @@ Each agent step should log:
 
 ### What Already Exists (Prototype Hooks)
 
-- `controller.getState()` — fully implemented, returns real observation.
-- `controller.issueFlap()` — fully implemented, triggers real flap.
-- `controller.ready` — Promise; await before starting training episodes.
+All four games implement standardized LAYA hooks:
+
+1. **Flappy Bird:**
+   - `controller.getState()` — returns `{ birdY, birdVelocity, birdRotation, playAreaHeight, nextPipe, score, state }`.
+   - `controller.issueFlap()` — triggers a programmatic flap action.
+
+2. **2048:**
+   - `controller.getState()` — returns `{ board: number[][], score, over, won, maxTile, validMoves: number[] }`.
+   - `controller.move(direction)` — programmatically slides tiles in direction `0` (Up), `1` (Right), `2` (Down), or `3` (Left).
+
+3. **Hamster Hit:**
+   - `controller.getState()` — returns `{ score, timeLeft, holes: Array<{id, type, isUp, isWhacked}>, difficulty }`.
+   - `controller.whack(holeIndex)` — programmatically hits hole index `0` through `8`.
+
+4. **Snake:**
+   - `controller.getState()` — returns `{ snake: Array<{x, y}>, head, food, direction, gridSize, score, paused, over }`.
+   - `controller.setDirection(dir)` — programmatically steers the snake (`'up'`, `'down'`, `'left'`, `'right'`).
+
+- `controller.ready` — Promise on each controller; await before starting training episodes.
 
 ### What Must Be Added (Main Project)
 
-- RL model (Python/TensorFlow or PyTorch, or in-browser ONNX).
-- Agent inference loop that calls `getState()` and `issueFlap()`.
+- RL models (Python/TensorFlow, PyTorch, or in-browser ONNX).
+- Agent inference loop calling `getState()` and the respective action method.
 - Episode management and logging.
 - Training pipeline.
 - Connecting the "Let Laya Play" button to the agent loop.
@@ -274,7 +299,11 @@ Each agent step should log:
 | `--warning` | `#f3c97a` | Best score value |
 | `--danger` | `#ff8585` | Error states |
 
-Per-game theme variables (`--game-accent`, `--game-accent-soft`, `--game-accent-glow`) override the defaults on the screen element.
+Per-game theme variables:
+- **Flappy Bird:** Cyan/Teal (`#66d9e8`)
+- **2048:** Amber/Gold (`#f59e0b`)
+- **Hamster Hit:** Warm Orange (`#ff7722`)
+- **Snake:** Vibrant Emerald Green (`#22c55e`)
 
 ### Typography
 
@@ -312,19 +341,23 @@ Multiples of 4px: `--space-1` (4px) through `--space-12` (48px).
 
 | Item | Source | License |
 |---|---|---|
-| Flappy Bird clone engine | https://github.com/nebez/floppybird | Apache 2.0 |
-| All sprite assets | Same repository | Apache 2.0 |
-| Sound effects | Same repository | Apache 2.0 |
+| Flappy Bird clone engine & sprites | https://github.com/nebez/floppybird | Apache 2.0 |
+| 2048 game engine & mechanics | https://github.com/gabrielecirulli/2048 | MIT License |
+| Hamster Hit whack-a-mole mechanics | https://github.com/Yeab-Ad/Punch-Game (fallback: https://github.com/naikmubashir/FeF-WhackAMole) | MIT License |
+| Snake game engine & mechanics | https://github.com/Impre7ive/snake-game-javascript | MIT License |
 | Inter font | Google Fonts | SIL OFL 1.1 |
 
-The license file is stored at `games/flappy-bird/LICENSE`.
+Each game directory maintains its respective license file:
+- `games/flappy-bird/LICENSE` (Apache 2.0)
+- `games/2048/LICENSE` (MIT)
+- `games/hamster-hit/LICENSE` (MIT)
+- `games/snake/LICENSE` (MIT)
 
-**Modifications to the original work:**
-- Engine rewritten as vanilla ES module using Canvas API (no jQuery/Buzz).
-- Physics constants preserved exactly from original.
-- All original assets retained without modification.
-- Added LAYA integration hooks (`getState`, `issueFlap`).
-- Added responsive ResizeObserver-based canvas sizing.
+**Modifications & Design Adaptations:**
+- **Flappy Bird:** Canvas-based rewrite; LAYA observation & action hooks.
+- **2048:** Re-engineered as a modern ES module with scoped `.game-2048` CSS, responsive GPU transforms, touch swipe, WASD, and amber/gold dark theme.
+- **Hamster Hit:** Reskinned as an original hamster game with inline SVG art (hamsters, golden bonus, bomb decoy, burrows), 30-second timer with dynamic difficulty scaling, and warm orange theme.
+- **Snake:** Canvas engine rewritten with high-DPI scaling, smooth rounded segments, apple spawns, speed progression, Space key pause, mobile virtual D-pad, and green theme.
 
 ---
 
@@ -332,35 +365,19 @@ The license file is stored at `games/flappy-bird/LICENSE`.
 
 ### Real-Browser QA Audit (Chrome DevTools Protocol Automated Suite)
 
-Executed against running application (`http://127.0.0.1:3000`) using Google Chrome via direct Chrome DevTools Protocol (CDP) session:
+Executed against running application (`http://127.0.0.1:3000`) using Google Chrome:
 
 | Check | Testing Method | Result | Notes |
 |---|---|---|---|
-| Library screen load & cards | Browser CDP DOM Inspection | ✅ PASS | 4 cards rendered; 1 active Flappy Bird, 3 placeholders with "Soon" status badges |
-| Flappy Bird card navigation | Browser CDP Click & DOM Evaluation | ✅ PASS | Navigates to `#/game/flappy-bird` |
-| Mode screen rendering & theme | Browser CDP DOM & Computed Style | ✅ PASS | Per-game CSS accent (`#66d9e8`) and glow variables applied |
-| LAYA mode disabled state | Browser CDP DOM & Attribute Check | ✅ PASS | `aria-disabled="true"`, disabled button, lock badge, explanatory text |
-| Play Yourself navigation & canvas | Browser CDP Click & Canvas Inspection | ✅ PASS | Navigates to `#/play/flappy-bird`, canvas mounts (DPR scaled), score=0 |
-| Space, Click, Touch input handling | Browser DOM Event Dispatch | ✅ PASS | Flaps triggered via keyboard Space, mouse click, and touch start |
-| Gravity physics & collision detection | Browser Event & Physics Evaluation | ✅ PASS | Bird falls under gravity; pipe/ground collision triggers game-over state |
-| Game-over overlay display | Browser CDP DOM Evaluation | ✅ PASS | Modal overlay renders with final score and Play Again button |
-| Game restart without page reload | Browser CDP Button Click | ✅ PASS | Clears overlay, resets score to 0, preserves best score |
-| Best score persistence across refresh | Browser Page Reload & localStorage | ✅ PASS | Best score verified in `localStorage` and persists after hard page reload |
-| Back navigation & lifecycle teardown | Browser CDP Button Click | ✅ PASS | Returns to `#/`; cancels animation loop; removes stale nodes |
-| Direct route refresh (all 3 routes) | Browser Direct URL Navigation | ✅ PASS | `#/`, `#/game/flappy-bird`, `#/play/flappy-bird` all load directly |
-| Browser Back / Forward history | Browser History API Back/Forward | ✅ PASS | Hash changes and view transitions sync with history navigation |
-| Invalid route handling (404) | Browser Navigation to Invalid Hash | ✅ PASS | Unknown routes render 404 screen with Return Home button |
-| Responsive layout (375px, 768px, 1280px) | Browser CDP Viewport Emulation | ✅ PASS | Zero horizontal scroll/overflow across mobile, tablet, and desktop |
-| Reduced motion support | Browser CDP Media Emulation | ✅ PASS | `prefers-reduced-motion: reduce` collapses CSS transitions |
-| Keyboard focus accessibility | Browser Focus Management | ✅ PASS | Interactive controls accept focus with visible outline |
-| Repeated entry/exit lifecycle (5 cycles) | Rapid Route Transition Loop | ✅ PASS | 5 rapid transitions between `#/` and `#/play/flappy-bird`; 0 duplicate canvases |
-| Console errors & network failures | Browser Console & Network Interception | ✅ PASS | 0 runtime JS exceptions, 0 console errors, 0 failed network requests |
-
-### Known Limitations
-
-- **OGG audio on Safari:** Safari does not support OGG Vorbis by default. The game runs silently on Safari; no crash occurs.
-- **Physical touch device validation:** Touch events were verified via synthetic touch event dispatch; physical haptic testing requires a mobile device.
-- **Very narrow viewports (<320px):** Layout degrades gracefully but was not exhaustively tested below 320px.
+| Library screen load & cards | Browser CDP DOM Inspection | ✅ PASS | All 4 cards rendered with Active badges and themed artwork |
+| 2048 mode & play screen | Browser CDP Navigation & Input | ✅ PASS | Navigates cleanly; WASD/arrows slide tiles; score tracks |
+| Hamster Hit mode & play screen | Browser CDP Navigation & Clicks | ✅ PASS | 30s timer runs; hamsters and bombs pop up; clicks score correctly |
+| Snake mode & play screen | Browser CDP Navigation & Input | ✅ PASS | Canvas scales with DPR; arrow keys/D-pad steer snake; Space pauses |
+| Flappy Bird card navigation | Browser CDP Click & DOM Evaluation | ✅ PASS | Flappy Bird gameplay remains completely intact and verified |
+| LAYA mode disabled state | Browser CDP DOM & Attribute Check | ✅ PASS | All 4 games render Laya card disabled with prototype disclaimer |
+| Best score persistence per game | Browser Page Reload & localStorage | ✅ PASS | Independent keys verified (`flappy-bird`, `2048`, `hamster-hit`, `snake`) |
+| Repeated entry/exit lifecycle | Rapid Route Transition Loop | ✅ PASS | Switching between games cancels timers, listeners, and loops without leaks |
+| Keyboard page scroll suppression | DOM Event Evaluation | ✅ PASS | Arrow keys and Space intercepted on active play screen |
 
 ---
 
@@ -389,4 +406,5 @@ All asset URLs use relative paths (`./css/...`, `./games/...`) and resolve corre
 
 | Date | Change |
 |---|---|
+| 2026-10-15 | **Sprint 2: Multi-Game Expansion (2048, Hamster Hit, Snake)**.<br>• Cloned open-source MIT references: Gabriele Cirulli's 2048, Yeab-Ad's Punch-Game / naikmubashir's WhackAMole, and Impre7ive's Snake.<br>• Implemented 2048 with GPU-accelerated transforms, amber/gold palette, and touch/WASD controls.<br>• Implemented Hamster Hit with custom inline SVG hamsters/bombs, 30s countdown, ramping difficulty, and desktop mallet cursor.<br>• Implemented Snake with high-DPI canvas, rounded segments, dynamic speed ramp, Space pause, and on-screen virtual D-pad.<br>• Extended Game Library controller lifecycle contract to all 3 new games with comprehensive `destroy()` cleanup.<br>• Isolated best scores using `game-library:<id>:best` in `localStorage`.<br>• Implemented documented LAYA observation & action hooks on all games.<br>• Updated library cards to Active status, updated mode screen art, and refreshed footer credits. |
 | 2026-10-14 | Initial build. Complete from scratch. Library, mode, and play screens implemented. Flappy Bird canvas engine written. All assets downloaded from nebez/floppybird@gh-pages. Hash router, game registry, game lifecycle interface, LAYA stubs, documentation. |

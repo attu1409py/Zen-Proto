@@ -64,6 +64,38 @@ function renderModeArt(game) {
   if (game.id === 'flappy-bird') {
     return ICONS.bird;
   }
+  if (game.id === '2048') {
+    return `
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+        <rect width="44" height="44" rx="10" fill="#f59e0b"/>
+        <text x="22" y="27" text-anchor="middle" fill="#0b0d10" font-size="13" font-weight="800" font-family="Inter,sans-serif">2048</text>
+      </svg>`;
+  }
+  if (game.id === 'hamster-hit') {
+    return `
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+        <circle cx="22" cy="22" r="20" fill="#ff7722" opacity="0.2"/>
+        <circle cx="12" cy="12" r="6" fill="#d97706"/>
+        <circle cx="32" cy="12" r="6" fill="#d97706"/>
+        <ellipse cx="22" cy="25" rx="15" ry="13" fill="#f59e0b"/>
+        <ellipse cx="22" cy="28" rx="8" ry="7" fill="#fef3c7"/>
+        <circle cx="17" cy="23" r="2" fill="#111827"/>
+        <circle cx="27" cy="23" r="2" fill="#111827"/>
+        <polygon points="20,26 24,26 22,28" fill="#f43f5e"/>
+      </svg>`;
+  }
+  if (game.id === 'snake') {
+    return `
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+        <rect x="4" y="22" width="10" height="10" rx="3" fill="#16a34a"/>
+        <rect x="14" y="22" width="10" height="10" rx="3" fill="#22c55e"/>
+        <rect x="24" y="22" width="10" height="10" rx="3" fill="#22c55e"/>
+        <rect x="24" y="10" width="12" height="12" rx="4" fill="#4ade80"/>
+        <circle cx="31" cy="14" r="1.5" fill="#0b0d10"/>
+        <circle cx="31" cy="18" r="1.5" fill="#0b0d10"/>
+        <circle cx="10" cy="10" r="4" fill="#ef4444"/>
+      </svg>`;
+  }
   return `<div style="font-size:2rem;opacity:0.6">🎮</div>`;
 }
 
@@ -130,8 +162,7 @@ export function renderGameMode(params) {
               <div class="mode-card__title">Play Yourself</div>
             </div>
             <p class="mode-card__desc">
-              You control the bird. Tap, click, or press Space to flap.
-              Your reflexes, your score.
+              ${escHtml(game.modePlayDesc || 'Your reflexes, your score.')}
             </p>
             <button
               class="btn btn--primary btn--lg"
